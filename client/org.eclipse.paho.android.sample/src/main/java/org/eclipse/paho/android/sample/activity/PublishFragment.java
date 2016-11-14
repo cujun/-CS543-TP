@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.v4.app.Fragment;
@@ -24,6 +26,7 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.content.Intent;
+import android.widget.Toast;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
@@ -51,10 +54,19 @@ public class PublishFragment extends Fragment {
     int selectedQos = 0;
     boolean retainValue = false;
     String hashtag = "", imagePath = "", imageUri = "";
+    ProgressDialog publishDialog;
 
     public PublishFragment() {
         // Required empty public constructor
     }
+
+    // handler for releasing publishDialog
+    Handler dialogDismissHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            publishDialog.dismiss();
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -130,63 +142,69 @@ public class PublishFragment extends Fragment {
         publishButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Check whether the entered hashtag is valid
+                if (hashtag.length() < 1) {
+                    Toast.makeText(getActivity(), "Please enter the hashtag of your image", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 // Check there is an image selected
                 if (imagePath.length() < 1) {
-                    // TO DO
+                    Toast.makeText(getActivity(), "Please select an image to publish", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                // Make thread which will get the image uri
-                Thread threadGetImageUri = new Thread() {
+                // Make thread which will do all publish jobs
+                Thread threadPublish = new Thread() {
                     public void run() {
                         try {
+
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    publishDialog = new ProgressDialog(getActivity());
+                                    publishDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                                    publishDialog.setMessage("Publishing...");
+                                    publishDialog.show();
+                                }
+                            });
+
+                            // Assume all hashtag start with '#'
+                            System.out.println("Parsing hashtag[" + hashtag + "]...");
+                            StringTokenizer tokenizer = new StringTokenizer(hashtag);
+                            ArrayList<String> hashtagList = new ArrayList<>();
+                            while (tokenizer.hasMoreElements()) {
+                                hashtagList.add(tokenizer.nextToken().substring(1));
+                            }
+
                             // Upload selected image to cloudinary
                             System.out.println("Uploading image to cloudinary...");
-
                             Map config = new HashMap();
-                            config.put("cloud_name", "teamc");
-                            config.put("api_key", "552788372692362");
-                            config.put("api_secret", "-BCX9WJ4FYICQQqkwoSsSIOnuaU");
+                            config.put("cloud_name", "cs543teamc");
+                            config.put("api_key", "543136171475397");
+                            config.put("api_secret", "VYhheb0vB7wqE-6U5JfUwVqP7qQ");
                             Cloudinary cloudinary = new Cloudinary(config);
                             Map uploadResult = cloudinary.uploader().upload(new File(imagePath), ObjectUtils.emptyMap());
                             imageUri = uploadResult.get("url").toString();
-
                             System.out.println("Upload Success!\nResult:\n" + imageUri);
+
+                            System.out.println("Publish Starts...");
+                            for (String currHashtag : hashtagList) {
+                                System.out.println("Publishing: [hashtag: " + currHashtag + ", imageUri: " + imageUri + ", QoS: " + selectedQos + ", Retain: " + retainValue + "]");
+                                ((MainActivity) getActivity()).publish(connection, currHashtag, imageUri, selectedQos, retainValue);
+                            }
+
+                            // Now, we are done!
+                            System.out.println("All done!");
+                            dialogDismissHandler.sendEmptyMessage(0);
+
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                     }
                 };
 
-
-                try {
-
-
-                    // Assume all hashtag start with '#'
-                    System.out.println("Parsing hashtag[" + hashtag + "]...");
-                    StringTokenizer tokenizer = new StringTokenizer(hashtag);
-                    ArrayList<String> hashtagList = new ArrayList<>();
-                    while (tokenizer.hasMoreElements()) {
-                        hashtagList.add(tokenizer.nextToken().substring(1));
-                    }
-
-                    System.out.println("Getting shared URL of image...");
-                    threadGetImageUri.start();
-                    threadGetImageUri.join();
-
-                    System.out.println("Publish Starts...");
-                    for (String currHashtag : hashtagList) {
-                        System.out.println("Publishing: [hashtag: " + currHashtag + ", imageUri: " + imageUri + ", QoS: " + selectedQos + ", Retain: " + retainValue + "]");
-                        ((MainActivity) getActivity()).publish(connection, currHashtag, imageUri, selectedQos, retainValue);
-                    }
-
-                    System.out.println("All done!");
-
-
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
+                // Task start
+                threadPublish.start();
 
             }
         });
