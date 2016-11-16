@@ -54,6 +54,7 @@ public class PublishFragment extends Fragment {
     int selectedQos = 0;
     boolean retainValue = false;
     String hashtag = "", imagePath = "", imageUri = "";
+    ArrayList<String> hashtagList;
     ProgressDialog publishDialog;
 
     public PublishFragment() {
@@ -146,6 +147,20 @@ public class PublishFragment extends Fragment {
                 if (hashtag.length() < 1) {
                     Toast.makeText(getActivity(), "Please enter the hashtag of your image", Toast.LENGTH_SHORT).show();
                     return;
+                } else {
+                    // Hashtag validation
+                    // Assume all hashtags start with '#'
+                    System.out.println("Parsing hashtag[" + hashtag + "]...");
+                    StringTokenizer tokenizer = new StringTokenizer(hashtag);
+                    hashtagList = new ArrayList<>();
+                    while (tokenizer.hasMoreElements()) {
+                        String curr = tokenizer.nextToken();
+                        if (curr.charAt(0) != '#') {
+                            Toast.makeText(getActivity(), "Please start hashtag with '#'", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        hashtagList.add(curr.substring(1));
+                    }
                 }
                 // Check there is an image selected
                 if (imagePath.length() < 1) {
@@ -168,13 +183,6 @@ public class PublishFragment extends Fragment {
                                 }
                             });
 
-                            // Assume all hashtag start with '#'
-                            System.out.println("Parsing hashtag[" + hashtag + "]...");
-                            StringTokenizer tokenizer = new StringTokenizer(hashtag);
-                            ArrayList<String> hashtagList = new ArrayList<>();
-                            while (tokenizer.hasMoreElements()) {
-                                hashtagList.add(tokenizer.nextToken().substring(1));
-                            }
 
                             // Upload selected image to cloudinary
                             System.out.println("Uploading image to cloudinary...");
@@ -187,15 +195,19 @@ public class PublishFragment extends Fragment {
                             imageUri = uploadResult.get("url").toString();
                             System.out.println("Upload Success!\nResult:\n" + imageUri);
 
+                            // Send the uri of image to server
                             System.out.println("Publish Starts...");
                             for (String currHashtag : hashtagList) {
                                 System.out.println("Publishing: [hashtag: " + currHashtag + ", imageUri: " + imageUri + ", QoS: " + selectedQos + ", Retain: " + retainValue + "]");
                                 ((MainActivity) getActivity()).publish(connection, currHashtag, imageUri, selectedQos, retainValue);
                             }
 
+
                             // Now, we are done!
                             System.out.println("All done!");
                             dialogDismissHandler.sendEmptyMessage(0);
+                            imagePath = "";
+                            imageUri = "";
 
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -203,8 +215,11 @@ public class PublishFragment extends Fragment {
                     }
                 };
 
-                // Task start
+                // Publish task start
                 threadPublish.start();
+                // Clear ImageView
+                ImageView imageView = (ImageView)getActivity().findViewById(R.id.publish_imageView);
+                imageView.setImageResource(android.R.color.transparent);
 
             }
         });
