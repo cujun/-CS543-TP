@@ -53,24 +53,13 @@ public class MainActivity extends AppCompatActivity{
 
         mFrame = (FrameLayout) findViewById(R.id.container_body);
 
-
-
-//        drawerFragment = (FragmentDrawer) getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
-//        drawerFragment.setUp(R.id.fragment_navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), mToolbar);
-//        drawerFragment.setDrawerListener(this);
-//
         populateConnectionList();
     }
 
-//    public void removeConnectionRow(Connection connection){
-//        drawerFragment.removeConnection(connection);
-//        populateConnectionList();
-//    }
 
     public Context getThemedContext(){
         return getSupportActionBar().getThemedContext();
     }
-
 
 
     private void populateConnectionList(){
@@ -91,11 +80,8 @@ public class MainActivity extends AppCompatActivity{
             ++connectionIndex;
         }
 
-        if(connectionMap.size() == 0){
-
+        if (connectionMap.size() == 0){
             createConnection();
-//            displayView(0);
-
         } else {
             displayView(0);
         }
@@ -103,42 +89,7 @@ public class MainActivity extends AppCompatActivity{
 
     }
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.menu_main, menu);
-//        return true;
-//    }
 
-
-
-//    @Override
-//    public void onDrawerItemSelected(View view, int position){
-//        displayView(position);
-//    }
-//
-//    @Override
-//    public void onDrawerItemLongSelected(View view, int position){
-//        displayDeleteView(position);
-//    }
-//
-//    @Override
-//    public void onAddConnectionSelected(View view) {
-//        Fragment editConnectionFragment =  new EditConnectionFragment();
-//        String title = "Edit Connection";
-//        displayFragment(editConnectionFragment, title);
-//    }
-
-//
-//    private void displayDeleteView(int position){
-//        if(position == -1){
-//            displayFragment(new ConnectionFragment(), "Connection");
-//            return;
-//        } else {
-//            Toast.makeText(this, "DisplayDeleteView CHECKITOUT", Toast.LENGTH_LONG).show();
-//        }
-//    }
-//
     private void displayView(int position){
         if(position == -1){
             displayFragment(new ConnectionFragment(), "Connection");
@@ -172,48 +123,20 @@ public class MainActivity extends AppCompatActivity{
 
     private void createConnection(){
         ConnectionModel formModel;
-
         formModel = new ConnectionModel();
-        //TODO : Set FormModels
-        String clientId = "";
-        String serverHostname = "";
-        int serverPort = -1;
-        boolean cleanSession = true;
-        String username = "";
-        String password = "";
-        String tlsServerKey= "";
-        String tlsClientKey= "";
-        int timeout = 10;
-        int keepAlive = 10;
-        String lwtTopic = "";
-        String lwtMessage= "";
-        int lwtQos = -1;
-        boolean lwtRetain = true;
+        formModel.setClientId("CS543 HISS TeamC");
+        formModel.setServerHostName("143.248.53.10");
 
-        formModel.setClientId(clientId);
-        formModel.setServerHostName(serverHostname);
-        formModel.setServerPort(serverPort);
-        formModel.setCleanSession(cleanSession);
-        formModel.setUsername(username);
-        formModel.setPassword(password);
-        formModel.setTlsServerKey(tlsServerKey);
-        formModel.setTlsClientKey(tlsClientKey);
-        formModel.setTimeout(timeout);
-        formModel.setKeepAlive(keepAlive);
-        formModel.setLwtTopic(lwtTopic);
-        formModel.setLwtMessage(lwtMessage);
-        formModel.setLwtQos(lwtQos);
-        formModel.setLwtRetain(lwtRetain);
-
+        // Add new client handle
         String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         Random random = new Random();
-
         StringBuilder sb = new StringBuilder(8);
         for (int i = 0; i < 8; i++){
             sb.append(AB.charAt(random.nextInt(AB.length())));
         }
         String clientHandle = sb.toString() + '-' + formModel.getServerHostName() + '-' + formModel.getClientId();
         formModel.setClientHandle(clientHandle);
+        // Persist this connection
         persistAndConnect(formModel);
 
     }
