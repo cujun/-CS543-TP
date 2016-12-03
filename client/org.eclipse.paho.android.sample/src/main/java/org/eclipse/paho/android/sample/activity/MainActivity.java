@@ -1,20 +1,16 @@
 package org.eclipse.paho.android.sample.activity;
 
 
-
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.widget.DrawerLayout;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
+import android.util.Log;
+import android.widget.FrameLayout;
+
 import org.eclipse.paho.android.sample.R;
 import org.eclipse.paho.android.sample.internal.Connections;
 import org.eclipse.paho.android.sample.model.ConnectionModel;
@@ -26,12 +22,14 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 
 
-public class MainActivity extends AppCompatActivity implements FragmentDrawer.FragmentDrawerListener{
+
+public class MainActivity extends AppCompatActivity{
 
     private Toolbar mToolbar;
-    private FragmentDrawer drawerFragment;
+//    private FragmentDrawer drawerFragment;
 
     private static final String TAG = "MainActivity";
 
@@ -40,6 +38,8 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
     private MainActivity mainActivity = this;
 
     private ArrayList<String> connectionMap;
+
+    private FrameLayout mFrame;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,17 +51,21 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        drawerFragment = (FragmentDrawer) getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
-        drawerFragment.setUp(R.id.fragment_navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), mToolbar);
-        drawerFragment.setDrawerListener(this);
+        mFrame = (FrameLayout) findViewById(R.id.container_body);
 
+
+
+//        drawerFragment = (FragmentDrawer) getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
+//        drawerFragment.setUp(R.id.fragment_navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), mToolbar);
+//        drawerFragment.setDrawerListener(this);
+//
         populateConnectionList();
     }
 
-    public void removeConnectionRow(Connection connection){
-        drawerFragment.removeConnection(connection);
-        populateConnectionList();
-    }
+//    public void removeConnectionRow(Connection connection){
+//        drawerFragment.removeConnection(connection);
+//        populateConnectionList();
+//    }
 
     public Context getThemedContext(){
         return getSupportActionBar().getThemedContext();
@@ -71,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
 
     private void populateConnectionList(){
         // Clear drawerFragment
-        drawerFragment.clearConnections();
+//        drawerFragment.clearConnections();
 
         // get all the available connections
         Map<String, Connection> connections = Connections.getInstance(this)
@@ -82,71 +86,62 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
         Iterator connectionIterator = connections.entrySet().iterator();
         while (connectionIterator.hasNext()){
             Map.Entry pair = (Map.Entry) connectionIterator.next();
-            drawerFragment.addConnection((Connection) pair.getValue());
+            //drawerFragment.addConnection((Connection) pair.getValue());
             connectionMap.add((String) pair.getKey());
             ++connectionIndex;
         }
 
         if(connectionMap.size() == 0){
-            displayView(-1);
+
+            createConnection();
+//            displayView(0);
+
         } else {
             displayView(0);
         }
-    }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-
-
-    @Override
-    public void onDrawerItemSelected(View view, int position){
-        displayView(position);
-    }
-
-    @Override
-    public void onDrawerItemLongSelected(View view, int position){
-        displayDeleteView(position);
-    }
-
-    @Override
-    public void onAddConnectionSelected(View view) {
-        Fragment editConnectionFragment =  new EditConnectionFragment();
-        String title = "Edit Connection";
-        displayFragment(editConnectionFragment, title);
-    }
-
-    @Override
-    public void onHelpSelected(View view) {
-        Fragment helpFragment = new HelpFragment();
-        displayFragment(helpFragment, getString(R.string.help_and_feedback));
 
     }
 
-    private void displayDeleteView(int position){
-        if(position == -1){
-            displayFragment(new HomeFragment(), "Home");
-            return;
-        } else {
-            Fragment fragment  = new ManageConnectionFragment();
-            Bundle bundle = new Bundle();
-            bundle.putString(ActivityConstants.CONNECTION_KEY, connectionMap.get(position));
-            fragment.setArguments(bundle);
-            Map<String, Connection> connections = Connections.getInstance(this)
-                    .getConnections();
-            Connection connection = connections.get(connectionMap.get(position));
-            String title = connection.getId();
-            displayFragment(fragment, "");
-        }
-    }
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        // Inflate the menu; this adds items to the action bar if it is present.
+//        getMenuInflater().inflate(R.menu.menu_main, menu);
+//        return true;
+//    }
 
+
+
+//    @Override
+//    public void onDrawerItemSelected(View view, int position){
+//        displayView(position);
+//    }
+//
+//    @Override
+//    public void onDrawerItemLongSelected(View view, int position){
+//        displayDeleteView(position);
+//    }
+//
+//    @Override
+//    public void onAddConnectionSelected(View view) {
+//        Fragment editConnectionFragment =  new EditConnectionFragment();
+//        String title = "Edit Connection";
+//        displayFragment(editConnectionFragment, title);
+//    }
+
+//
+//    private void displayDeleteView(int position){
+//        if(position == -1){
+//            displayFragment(new ConnectionFragment(), "Connection");
+//            return;
+//        } else {
+//            Toast.makeText(this, "DisplayDeleteView CHECKITOUT", Toast.LENGTH_LONG).show();
+//        }
+//    }
+//
     private void displayView(int position){
         if(position == -1){
-            displayFragment(new HomeFragment(), "Home");
+            displayFragment(new ConnectionFragment(), "Connection");
             return;
         } else {
             Fragment fragment  = new ConnectionFragment();
@@ -173,6 +168,54 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
 
 
         }
+    }
+
+    private void createConnection(){
+        ConnectionModel formModel;
+
+        formModel = new ConnectionModel();
+        //TODO : Set FormModels
+        String clientId = "";
+        String serverHostname = "";
+        int serverPort = -1;
+        boolean cleanSession = true;
+        String username = "";
+        String password = "";
+        String tlsServerKey= "";
+        String tlsClientKey= "";
+        int timeout = 10;
+        int keepAlive = 10;
+        String lwtTopic = "";
+        String lwtMessage= "";
+        int lwtQos = -1;
+        boolean lwtRetain = true;
+
+        formModel.setClientId(clientId);
+        formModel.setServerHostName(serverHostname);
+        formModel.setServerPort(serverPort);
+        formModel.setCleanSession(cleanSession);
+        formModel.setUsername(username);
+        formModel.setPassword(password);
+        formModel.setTlsServerKey(tlsServerKey);
+        formModel.setTlsClientKey(tlsClientKey);
+        formModel.setTimeout(timeout);
+        formModel.setKeepAlive(keepAlive);
+        formModel.setLwtTopic(lwtTopic);
+        formModel.setLwtMessage(lwtMessage);
+        formModel.setLwtQos(lwtQos);
+        formModel.setLwtRetain(lwtRetain);
+
+        String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        Random random = new Random();
+
+        StringBuilder sb = new StringBuilder(8);
+        for (int i = 0; i < 8; i++){
+            sb.append(AB.charAt(random.nextInt(AB.length())));
+        }
+        String clientHandle = sb.toString() + '-' + formModel.getServerHostName() + '-' + formModel.getClientId();
+        formModel.setClientHandle(clientHandle);
+        persistAndConnect(formModel);
+
     }
 
     public void setActionBarTitle(String title){
@@ -205,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
             MqttConnectOptions connOpts = optionsFromModel(model);
             connection.addConnectionOptions(connOpts);
             Connections.getInstance(this).updateConnection(connection);
-            drawerFragment.updateConnection(connection);
+//            drawerFragment.updateConnection(connection);
 
             connection.getClient().connect(connOpts, null, callback);
             Fragment fragment  = new ConnectionFragment();
@@ -249,7 +292,7 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
         connection.addConnectionOptions(connOpts);
         Connections.getInstance(this).addConnection(connection);
         connectionMap.add(model.getClientHandle());
-        drawerFragment.addConnection(connection);
+//        drawerFragment.addConnection(connection);
 
         try {
             connection.getClient().connect(connOpts, null, callback);
@@ -268,9 +311,6 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
         }
 
     }
-
-
-
 
 
     private MqttConnectOptions optionsFromModel(ConnectionModel model){
@@ -366,14 +406,14 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
             if (!event.getPropertyName().equals(ActivityConstants.ConnectionStatusProperty)) {
                 return;
             }
-            mainActivity.runOnUiThread(new Runnable() {
-
-                @Override
-                public void run() {
-                    mainActivity.drawerFragment.notifyDataSetChanged();
-                }
-
-            });
+//            mainActivity.runOnUiThread(new Runnable() {
+//
+//                @Override
+//                public void run() {
+//                    mainActivity.drawerFragment.notifyDataSetChanged();
+//                }
+//
+//            });
 
         }
 

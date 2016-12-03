@@ -9,21 +9,20 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
-import android.widget.Switch;
+
 import org.eclipse.paho.android.sample.R;
 import org.eclipse.paho.android.sample.internal.Connections;
+
 import java.util.Map;
 
 
 public class ConnectionFragment extends Fragment {
     Connection connection;
     FragmentTabHost mTabHost;
-    Switch connectSwitch;
     boolean connected;
 
     public ConnectionFragment() {
-        setHasOptionsMenu(true);
+
     }
 
     @Override
@@ -58,15 +57,12 @@ public class ConnectionFragment extends Fragment {
         mTabHost.addTab(mTabHost.newTabSpec("History").setIndicator("History"), HistoryFragment.class, bundle);
         mTabHost.addTab(mTabHost.newTabSpec("Publish").setIndicator("Publish"), PublishFragment.class, bundle);
         mTabHost.addTab(mTabHost.newTabSpec("Subscribe").setIndicator("Subscribe"), SubscriptionFragment.class, bundle);
+        mTabHost.getTabWidget().getChildTabViewAt(1).setEnabled(true);
+        mTabHost.getTabWidget().getChildTabViewAt(2).setEnabled(true);
         return rootView;
 
     }
 
-    public void changeConnectedState(boolean state){
-        mTabHost.getTabWidget().getChildTabViewAt(1).setEnabled(state);
-        mTabHost.getTabWidget().getChildTabViewAt(2).setEnabled(state);
-        connectSwitch.setChecked(state);
-    }
 
     @Override
     public void onAttach(Activity activity) {
@@ -80,24 +76,10 @@ public class ConnectionFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(final Menu menu, MenuInflater inflater){
-        inflater.inflate(R.menu.menu_connection, menu);
 
 
-        connectSwitch = (Switch)  menu.findItem(R.id.connect_switch).getActionView().findViewById(R.id.switchForActionBar);
+        ((MainActivity) getActivity()).connect(connection);
 
-        connectSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    ((MainActivity) getActivity()).connect(connection);
-                    changeConnectedState(true);
-                } else {
-                    ((MainActivity) getActivity()).disconnect(connection);
-                    changeConnectedState(false);
-                }
-            }
-        });
-        changeConnectedState(connection.isConnected());
         super.onCreateOptionsMenu(menu, inflater);
     }
 

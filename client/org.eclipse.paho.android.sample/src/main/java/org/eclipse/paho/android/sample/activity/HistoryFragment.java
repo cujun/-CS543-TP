@@ -1,11 +1,14 @@
 package org.eclipse.paho.android.sample.activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 
@@ -69,10 +72,26 @@ public class HistoryFragment extends Fragment {
         messageHistoryListView = (ListView) rootView.findViewById(R.id.history_list_view);
         messageHistoryListView.setAdapter(messageListAdapter);
 
+        messageHistoryListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //TODO
+                ReceivedMessage msg = messageListAdapter.getItem(position);
+                Log.d("HistoryList", String.valueOf(msg.getMessage()));
+
+                Intent intent = new Intent(getActivity(), ViewImageActivity.class);
+                intent.putExtra("topic", msg.getTopic());
+                intent.putExtra("message", String.valueOf(msg.getMessage()));
+                startActivity(intent);
+
+            }
+        });
+
         clearButton = (Button) rootView.findViewById(R.id.history_clear_button);
         clearButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 messages.clear();
                 messageListAdapter.notifyDataSetChanged();
             }

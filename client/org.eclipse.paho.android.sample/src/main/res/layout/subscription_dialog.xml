@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:id="@+id/textView"
-        android:text="@string/topic_label" />
+        android:text="Topic" />
 
     <EditText
         android:id="@+id/subscription_topic_edit_text"

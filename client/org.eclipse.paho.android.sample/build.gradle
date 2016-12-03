@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
-
+    useLibrary 'org.apache.http.legacy'
     defaultConfig {
         applicationId rootProject.ext.sampleArchivesBaseName
         minSdkVersion 16
@@ -36,10 +36,11 @@ dependencies {
     compile "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
     compile "com.android.support:recyclerview-v7:${rootProject.ext.supportLibVersion}"
     compile "org.eclipse.paho:org.eclipse.paho.client.mqttv3:${rootProject.ext.clientVersion}"
-    compile(project(':org.eclipse.paho.android.service')) {
+    compile (project(':org.eclipse.paho.android.service')){
         //exclude module: "org.eclipse.paho.client.mqttv3"
-        transitive = true
+        transitive=true
     }
+    compile fileTree(dir: 'libs', include: ['*.jar'])
     compile files('libs/cloudinary-android-1.2.2.jar')
     compile files('libs/cloudinary-core-1.2.2.jar')
 }
