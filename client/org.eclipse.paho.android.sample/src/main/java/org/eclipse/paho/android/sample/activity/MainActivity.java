@@ -124,10 +124,7 @@ public class MainActivity extends AppCompatActivity{
     private void createConnection(){
         ConnectionModel formModel;
         formModel = new ConnectionModel();
-        formModel.setClientId("CS543 HISS TeamC");
-        formModel.setServerHostName("143.248.53.10");
-
-        // Add new client handle
+        // Add new client info
         String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         Random random = new Random();
         StringBuilder sb = new StringBuilder(8);
@@ -136,7 +133,10 @@ public class MainActivity extends AppCompatActivity{
         }
         String clientHandle = sb.toString() + '-' + formModel.getServerHostName() + '-' + formModel.getClientId();
         formModel.setClientHandle(clientHandle);
-        // Persist this connection
+        formModel.setClientId("[CS543 HISS TeamC] ClientID: " + sb.toString());
+        formModel.setServerHostName("143.248.53.10");
+
+        // Persist this connection and connect
         persistAndConnect(formModel);
 
     }
